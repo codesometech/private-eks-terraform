@@ -1,0 +1,36 @@
+apiVersion: mongodbcommunity.mongodb.com/v1
+kind: MongoDBCommunity
+metadata:
+  name: mongodb
+  namespace: mongodb
+spec:
+  members: 3
+  type: ReplicaSet
+  version: "4.2.6"
+  security:
+    authentication:
+      modes: ["SCRAM"]
+  users:
+    - name: mongodbuser
+      db: admin
+      passwordSecretRef:
+        name: mongodb-password
+        key: password
+      roles:
+        - name: readWrite
+          db: demo
+      scramCredentialsSecretName: mongodb
+
+  statefulSet:
+    spec:
+      serviceName: mongodb-svc
+      selector: {}
+      volumeClaimTemplates:
+        - metadata:
+            name: data-volume
+          spec:
+            accessModes: [ "ReadWriteOnce" ]
+            storageClassName: "gp3"
+            resources:
+              requests:
+                storage: 20Gi
